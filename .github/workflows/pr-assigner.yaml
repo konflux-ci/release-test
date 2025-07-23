@@ -1,0 +1,19 @@
+name: Assign Reviewers
+
+on:
+  pull_request:
+    types: [opened, ready_for_review, review_request_removed]
+
+jobs:
+  assign-reviewers:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Assign reviewers using shared action
+        uses: konflux-ci/release-service-automations/.github/actions/pr-assigner@main
+        with:
+          event-type: ${{ github.event.action }}
+          pr-number: ${{ github.event.pull_request.number }}
+          removed-reviewer: ${{ github.event.requested_reviewer.login || '' }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          slack-webhook: ${{ secrets.SLACK_WEBHOOK }}
