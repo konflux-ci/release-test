@@ -1,0 +1,31 @@
+name: Assign PR Reviewers
+
+on:
+  pull_request:
+    types:
+      - opened
+      - ready_for_review
+      - review_request_removed
+
+jobs:
+  assign:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Run reviewer assignment
+        working-directory: .github/scripts/pr-assigner
+        run: node assign_reviewers.js
+        env:
+          EVENT_TYPE: ${{ github.event.action }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          REMOVED_REVIEWERS: ${{ toJson(github.event.pull_request.requested_reviewers) }}
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+          USER_MAP_URL: https://gist.githubusercontent.com/davidmogar/cbe426b9ca93aefe727d822e24e13e0d/raw/user_map.yaml
